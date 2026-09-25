@@ -10,7 +10,9 @@ Colored touch zones can be hidden. Single and double taps inside a zone are cons
 
 Accessibility is a broad permission. This app only inspects SystemUI after a switching request and has no network permission. It depends on GrapheneOS's user-switcher view IDs, which may change between releases.
 
-<img src="screenshots/setup.png" alt="Configuration" width="280"> <img src="screenshots/accessibility.png" alt="Accessibility settings" width="280">
+[Watch the demo (10 seconds, 2× speed)](media/demo.mp4)
+
+<img src="screenshots/touch-zones.png" alt="Touch zones" width="260"> <img src="screenshots/setup.png" alt="Configuration" width="260"> <img src="screenshots/accessibility.png" alt="Accessibility settings" width="260">
 
 ## Build
 
