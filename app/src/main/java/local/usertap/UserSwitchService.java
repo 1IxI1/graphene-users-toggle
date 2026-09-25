@@ -62,7 +62,8 @@ public final class UserSwitchService extends AccessibilityService {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 cancel();
                 removeZones();
-            } else {
+            } else if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())
+                    || Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
                 refreshZones();
             }
         }
@@ -78,7 +79,9 @@ public final class UserSwitchService extends AccessibilityService {
         filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         if (android.os.Build.VERSION.SDK_INT >= 33) {
-            registerReceiver(screenReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            // USER_PRESENT is sent by SystemUI, which has a different UID from
+            // system_server. All three actions are protected system broadcasts.
+            registerReceiver(screenReceiver, filter, Context.RECEIVER_EXPORTED);
         } else {
             registerReceiver(screenReceiver, filter);
         }
