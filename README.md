@@ -2,6 +2,10 @@
 
 Triple-tap either top screen edge to switch Android users on GrapheneOS. Uses the system user switcher through Accessibility; no root, Shizuku, or persistent ADB connection.
 
+<img src="media/demo.gif" alt="User switching demo at 2× speed" width="360">
+
+[MP4 version (10 seconds, 2× speed)](media/demo.mp4)
+
 ## Setup
 
 Install the APK in each user. Open User Tap, enter an exact user name for each edge, save, and enable its accessibility service. Settings are local to each user. A blank target disables that edge. Use distinct user names.
@@ -10,9 +14,7 @@ Colored touch zones can be hidden. Single and double taps inside a zone are cons
 
 Accessibility is a broad permission. This app only inspects SystemUI after a switching request and has no network permission. It depends on GrapheneOS's user-switcher view IDs, which may change between releases.
 
-[Watch the demo (10 seconds, 2× speed)](media/demo.mp4)
-
-<img src="screenshots/touch-zones.png" alt="Touch zones" width="260"> <img src="screenshots/setup.png" alt="Configuration" width="260"> <img src="screenshots/accessibility.png" alt="Accessibility settings" width="260">
+<img src="screenshots/touch-zones.png" alt="Touch zones" width="280"> <img src="screenshots/accessibility.png" alt="Accessibility settings" width="280">
 
 ## Build
 
