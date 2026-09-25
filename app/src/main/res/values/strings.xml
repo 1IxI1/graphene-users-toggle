@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="service_description">Triple-tap a top screen edge to select a configured Android user through the system user switcher. The service inspects SystemUI only after your request. It does not enter credentials, record the screen, or access the network. Enable and configure it separately in each user.</string>
+</resources>
