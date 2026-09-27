@@ -48,12 +48,14 @@ public final class MainActivity extends Activity {
         button("Save targets", view -> save());
         toggle("Enable touch zones", "enabled", true);
         toggle("Show touch zones", "markers", true);
+        toggle("Disconnect Happ before switching", "disconnect_happ", false);
         button("Open accessibility settings", view -> startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)));
         button("Test left edge", view -> test(false));
         button("Test right edge", view -> test(true));
         button("Refresh status", view -> updateStatus());
         text("Tap the same top corner three times. Single and double taps inside a zone are consumed. Swiping down from a zone opens notifications. You can hide the colored markers.", 14);
         text("Install, configure, and enable the accessibility service separately in each Android user. The setting survives restarts; the service reconnects after unlocking that user. No ADB or Shizuku is needed during normal use.", 14);
+        text("Optional: disconnect Happ in the current user before switching. Enable this separately in every user where Happ is installed. User Tap does not connect Happ in the destination user.", 14);
         text("Accessibility is a broad system capability. This app inspects the SystemUI switcher only after your request. No network, analytics, screen recording, or credential entry. Switching does not end the previous user's session.", 14);
         updateStatus();
     }

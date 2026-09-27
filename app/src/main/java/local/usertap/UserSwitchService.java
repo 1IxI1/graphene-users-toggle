@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
@@ -33,8 +34,11 @@ public final class UserSwitchService extends AccessibilityService {
     private static final String USER_NAME = SYSTEM_UI + ":id/user_name";
     private static final String USER_ITEM = SYSTEM_UI + ":id/user_item";
     private static final String USER_SWITCH = SYSTEM_UI + ":id/multi_user_switch";
-    private static final int IDLE = 0, SHADE = 1, MENU = 2;
+    private static final String HAPP = "su.happ.proxyutility";
+    private static final String HAPP_DEEPLINK = HAPP + ".feature.deeplink.DeeplinkInterceptorActivity";
+    private static final int IDLE = 0, SHADE = 1, MENU = 2, STOPPING_HAPP = 3;
     private static final long TIMEOUT = 5000;
+    private static final long HAPP_STOP_DELAY = 700;
     static UserSwitchService connected;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -57,6 +61,14 @@ public final class UserSwitchService extends AccessibilityService {
         }
     };
     private final Runnable timeout = () -> finish("Switcher timed out. Select a user manually if needed.", true);
+    private final Runnable openSwitcher = () -> {
+        if (state != STOPPING_HAPP) return;
+        if (!unlocked()) {
+            finish("Unlock the current user first", true);
+            return;
+        }
+        showSwitcher();
+    };
     private final BroadcastReceiver screenReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
@@ -172,9 +184,28 @@ public final class UserSwitchService extends AccessibilityService {
             return;
         }
         for (TapSequence sequence : taps) sequence.reset();
+        removeZones();
+        if (Config.prefs(this).getBoolean("disconnect_happ", false)) {
+            state = STOPPING_HAPP;
+            Config.status(this, "Disconnecting Happ");
+            Intent disconnect = new Intent(Intent.ACTION_VIEW, Uri.parse("happ://disconnect_without_ui"));
+            disconnect.setClassName(HAPP, HAPP_DEEPLINK);
+            disconnect.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            try {
+                startActivity(disconnect);
+            } catch (RuntimeException error) {
+                finish("Could not disconnect Happ: " + error.getClass().getSimpleName(), true);
+                return;
+            }
+            handler.postDelayed(openSwitcher, HAPP_STOP_DELAY);
+            return;
+        }
+        showSwitcher();
+    }
+
+    private void showSwitcher() {
         startedAt = SystemClock.uptimeMillis();
         state = SHADE;
-        removeZones();
         handler.postDelayed(timeout, TIMEOUT);
         Config.status(this, "Opening user switcher");
         if (!performGlobalAction(GLOBAL_ACTION_QUICK_SETTINGS)) {
@@ -185,7 +216,8 @@ public final class UserSwitchService extends AccessibilityService {
     }
 
     @Override public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (state != IDLE && SYSTEM_UI.contentEquals(event.getPackageName() == null ? "" : event.getPackageName())) {
+        if ((state == SHADE || state == MENU)
+                && SYSTEM_UI.contentEquals(event.getPackageName() == null ? "" : event.getPackageName())) {
             queueStep(40);
         }
     }
@@ -198,7 +230,7 @@ public final class UserSwitchService extends AccessibilityService {
     }
 
     private void advance() {
-        if (state == IDLE) return;
+        if (state == IDLE || state == STOPPING_HAPP) return;
         if (!unlocked()) {
             cancel();
             removeZones();
@@ -304,6 +336,7 @@ public final class UserSwitchService extends AccessibilityService {
         stepQueued = false;
         handler.removeCallbacks(step);
         handler.removeCallbacks(timeout);
+        handler.removeCallbacks(openSwitcher);
     }
 
     private void removeZones() {

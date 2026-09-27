@@ -10,6 +10,8 @@ Triple-tap either top screen edge to switch Android users on GrapheneOS. Uses th
 
 Install the APK in each user. Open User Tap, enter an exact user name for each edge, save, and enable its accessibility service. Settings are local to each user. A blank target disables that edge. Use distinct user names.
 
+If you use Happ, enable **Disconnect Happ before switching** in each user. User Tap opens Happ's `disconnect_without_ui` link before showing the system user switcher. It does not start Happ in the destination user; if the switch fails, Happ remains disconnected in the original user.
+
 Colored touch zones can be hidden. Single and double taps inside a zone are consumed; a downward swipe opens notifications. Switching does not end the previous user's session or bypass its lock screen.
 
 Accessibility is a broad permission. This app only inspects SystemUI after a switching request and has no network permission. It depends on GrapheneOS's user-switcher view IDs, which may change between releases.
