@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -31,11 +31,13 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.USER_TAP_KEYSTORE_BASE64 }}
         run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            mkdir -p signing
-            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > signing/local.keystore
-            echo 'mode=update' >> "$GITHUB_OUTPUT"
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo '::error::USER_TAP_KEYSTORE_BASE64 is required for releases'
+            exit 1
           fi
+          mkdir -p signing
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > signing/local.keystore
+          echo 'mode=update' >> "$GITHUB_OUTPUT"
       - name: Build and verify APK
         run: python3 build.py
       - uses: actions/upload-artifact@v4
@@ -43,3 +45,14 @@ jobs:
           name: user-tap-${{ steps.signing.outputs.mode || 'test' }}-apk
           path: build/user-tap.apk
           if-no-files-found: error
+      - name: Publish dated release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release_date=$(date -u +%Y-%m-%d)
+          tag="v${release_date}.${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" build/user-tap.apk \
+            --target "$GITHUB_SHA" \
+            --title "$release_date (build $GITHUB_RUN_NUMBER)" \
+            --generate-notes
