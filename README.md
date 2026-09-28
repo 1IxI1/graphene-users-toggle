@@ -28,3 +28,5 @@ python3 build.py
 ```
 
 Output: `build/user-tap.apk`. The build runs gesture tests and verifies the APK signature. Keep the generated `signing/local.keystore` to sign future updates; build outputs and signing keys are ignored by Git.
+
+The **Build APK** GitHub Action builds on pushes to `main` and can also be run manually. Download its APK from the workflow run's artifacts. By default, CI signs with a temporary key (`user-tap-test-apk`), which cannot update an existing installation. To build update-compatible APKs, store a base64-encoded copy of your local `signing/local.keystore` as the repository secret `USER_TAP_KEYSTORE_BASE64` (for example, `base64 < signing/local.keystore | gh secret set USER_TAP_KEYSTORE_BASE64`). Builds on `main` will then use that key and upload `user-tap-update-apk`.
